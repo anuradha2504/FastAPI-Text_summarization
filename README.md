@@ -51,7 +51,7 @@ FastAPI & Uvicorn
 
 Clone the repository:
 
-git clone https://github.com/your-username/text-summarization-app.git
+git clone https://github.com/anuradha2504/FastAPI-Text_summarization/tree/main
 cd text-summarization-app
 
 
