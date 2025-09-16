@@ -7,13 +7,13 @@ import os
 app = FastAPI()
 
 # Load your Gemini API key , Define API endpoint URL
-GEMINI_API_KEY = "
+GEMINI_API_KEY = "AIzaSyCC-IUMgLphIyIoNFUwu7k0x1A793NjI-Q"
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
 
 # Define input model (text + summary length).
 class SummarizationRequest(BaseModel):
-    text: str
-    max_tokens: int = 15  # default summary length
+    prompt: str
+    max_tokens: int = 500  # default summary length
 
 # Define API endpoint /summarize ,Accepts SummarizationRequest body and implement logic to call Gemini API
 
@@ -26,17 +26,14 @@ def summarize_text(request: SummarizationRequest):
         "key": GEMINI_API_KEY
     }
 
-#Added API key to headers.Build summarization prompt.
-   
-    prompt = (
-    f"Summarize the following passage in about {request.max_tokens} words. "
-    f"Provide a concise summary without copying text:\n\n{request.text}"
-    )
 #Format request as per Gemini API specs.
     payload = {
         "contents": [
-            {"parts": [{"text": prompt}]}
-        ]
+            {"parts": [{"text": f"Summarize the following text in a concise and clear way:\n\n{request.prompt}"}]}
+        ],
+        "generationConfig": {
+            "maxOutputTokens": request.max_tokens
+        }
     }
 
 #Make POST request to Gemini API and If error → return error JSON.
@@ -50,11 +47,9 @@ def summarize_text(request: SummarizationRequest):
     result = response.json()
 
     # Extract summary text.
-    try:
-        summary = result["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except (KeyError, IndexError):
-        return {"error": "Unexpected response format", "response": result}
+    data = response.json()
+    summary_text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
 
     # Return as JSON response
 
-    return {"summary": summary}
+    return {"summary": summary_text}
